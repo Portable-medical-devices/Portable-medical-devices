@@ -3,8 +3,7 @@
 @brief    工程主函数文件
 @author   石国强
 @version  V1.0
-@introduction LED、BEEP任务调度实验
-@function 振铃DEMO
+@introduction OLED任务测试
 *****************************************************************************************/
 
 //UCOSIII中以下优先级用户程序不能使用，ALIENTEK
@@ -20,6 +19,8 @@
 #include "led.h"
 #include "beep.h"
 #include "delay.h"
+#include "oled.h"
+#include "oledbmp.h"
 
 //start任务
 //任务优先级
@@ -35,7 +36,7 @@ void start_task(void *p_arg);
 
 //led任务
 //任务优先级
-#define LED_TASK_PRIO		4
+#define LED_TASK_PRIO		7
 //任务堆栈大小	
 #define LED_STK_SIZE 		128
 //任务控制块
@@ -55,6 +56,17 @@ OS_TCB BeepTaskTCB;
 CPU_STK BEEP_TASK_STK[BEEP_STK_SIZE];
 void beep_task(void *p_arg);
 
+//OLED任务
+//任务优先级
+#define OLED_TASK_PRIO		6
+//任务堆栈大小	
+#define OLED_STK_SIZE 		128
+//任务控制块
+OS_TCB OledTaskTCB;
+//任务堆栈	
+CPU_STK OLED_TASK_STK[OLED_STK_SIZE];
+void oled_task(void *p_arg);
+
 int main() {
 	OS_ERR err;
 	CPU_SR_ALLOC();
@@ -63,8 +75,8 @@ int main() {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //中断分组
 	
 	LED_Init();         //硬件初始化
-	BEEP_Init(); 
-	LED(0);
+	BEEP_Init();    
+	OLED_Init();
 	OSInit(&err);	    //初始化UCOSIII
 	OS_CRITICAL_ENTER();//进入临界区
 	//创建开始任务
@@ -137,12 +149,26 @@ void start_task(void *p_arg)
                  (void   	* )0,				
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
                  (OS_ERR 	* )&err);	
+	//创建OLED
+	OSTaskCreate((OS_TCB 	* )&OledTaskTCB,		
+				 (CPU_CHAR	* )"oledtask", 		
+                 (OS_TASK_PTR )oled_task, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )OLED_TASK_PRIO,     	
+                 (CPU_STK   * )&OLED_TASK_STK[0],	
+                 (CPU_STK_SIZE)OLED_STK_SIZE/10,	
+                 (CPU_STK_SIZE)OLED_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,					
+                 (void   	* )0,				
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
+                 (OS_ERR 	* )&err);	
 			 							 
 	OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//挂起开始任务			 
 	OS_CRITICAL_EXIT();	//退出临界区
 }
 
-//led0任务函数
+//led任务函数
 void led_task(void *p_arg) {
 	OS_ERR err;
 	p_arg = p_arg;
@@ -150,6 +176,21 @@ void led_task(void *p_arg) {
 		LED(0);
 		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
 		LED(1);
+		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+	}
+}
+
+//beep任务函数
+void oled_task(void *p_arg) {
+	OS_ERR err;
+	p_arg = p_arg;
+	OLED_Clear();                                              //OLED清屏
+	OLED_Refresh();                                            //OLED刷屏
+	OLED_ShowPicture(0,0,128,8,LOGO);                          //显示LOGO
+	while(1) {
+		OLED_ColorTurn(1);                                     //白底黑字
+		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+		OLED_ColorTurn(0);                                     //黑底白字
 		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
 	}
 }
@@ -166,7 +207,7 @@ void beep_task(void *p_arg) {
 			BEEP(0);
 			OSTimeDlyHMSM(0,0,0,25,OS_OPT_TIME_HMSM_STRICT,&err); //延时50ms
 		}
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);    //延时500ms
 	}
 }
 
