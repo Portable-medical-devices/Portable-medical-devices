@@ -3,7 +3,7 @@
 @brief    工程主函数文件
 @author   石国强
 @version  V1.0
-@introduction OLED任务测试
+@introduction 陀螺仪、计步器测试任务
 *****************************************************************************************/
 
 //UCOSIII中以下优先级用户程序不能使用，ALIENTEK
@@ -21,6 +21,9 @@
 #include "delay.h"
 #include "oled.h"
 #include "oledbmp.h"
+#include "mpu6050.h"
+#include "inv_mpu.h"
+#include "stdio.h"
 
 //start任务
 //任务优先级
@@ -60,7 +63,7 @@ void beep_task(void *p_arg);
 //任务优先级
 #define OLED_TASK_PRIO		6
 //任务堆栈大小	
-#define OLED_STK_SIZE 		128
+#define OLED_STK_SIZE 		500
 //任务控制块
 OS_TCB OledTaskTCB;
 //任务堆栈	
@@ -75,8 +78,11 @@ int main() {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //中断分组
 	
 	LED_Init();         //硬件初始化
-	BEEP_Init();    
-	OLED_Init();
+	BEEP_Init();        //蜂鸣器初始化
+	OLED_Init();        //OLED初始化
+	//OLED_ShowNum(0,0,-123.22,16);
+	//OLED_Refresh();
+	MPU6050_Init();     //MPU6050初始化
 	OSInit(&err);	    //初始化UCOSIII
 	OS_CRITICAL_ENTER();//进入临界区
 	//创建开始任务
@@ -180,18 +186,46 @@ void led_task(void *p_arg) {
 	}
 }
 
-//beep任务函数
+	char buf[20] ={0};
+
+//oled任务函数
 void oled_task(void *p_arg) {
+	u8 i,size;
+	char buf[3][20]={0};
+//	float pitch,roll,yaw;  
 	OS_ERR err;
 	p_arg = p_arg;
-	OLED_Clear();                                              //OLED清屏
-	OLED_Refresh();                                            //OLED刷屏
-	OLED_ShowPicture(0,0,128,8,LOGO);                          //显示LOGO
+	OLED_Clear();                                               //OLED清屏
+	OLED_ShowPicture(0,0,128,8,LOGO);                           //显示LOGO
+	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);      //延时500ms
+	OLED_ShowString(0,0," MPU6050 [init]",16);
+	OLED_Refresh();                                             //OLED刷屏
+	while(mpu_dmp_init()) {                                     //DMP初始化
+		OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms
+	}
+	OLED_ShowString(0,0," MPU6050 [OK]  ",16);
+	OLED_Refresh();                                             //OLED刷屏
+	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);      //延时500ms
+	OLED_Clear();                                               //清屏
 	while(1) {
-		OLED_ColorTurn(1);                                     //白底黑字
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
-		OLED_ColorTurn(0);                                     //黑底白字
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err); //延时500ms
+//		while(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0)
+//			OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err); 
+//		sprintf(buf[0],"pitch:%f",pitch);
+//		sprintf(buf[1],"roll:%f",roll);
+//		sprintf(buf[2],"yaw:%f",yaw);
+//		size=12;
+//		for(i=0;i<3;++i) {
+//			OLED_ShowString(0,0+(size/8+(size%8?1:0))*8*i,buf[i],size);
+//		}
+		MPU_Step_Count();
+		sprintf(buf[0],"Sports:%d step",(int)walk.step);         //显示步数
+		sprintf(buf[1],"Distance:%.0f m",walk.distance);         //显示距离
+		size=16;
+		for(i=0;i<2;++i) {
+			OLED_ShowString(0,0+(size/8+(size%8?1:0))*8*i,buf[i],size);
+		}		
+		OLED_Refresh(); 
+		OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);     //延时5ms
 	}
 }
 

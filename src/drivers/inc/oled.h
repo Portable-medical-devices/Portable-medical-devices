@@ -56,7 +56,7 @@ void OLED_DrawLine(u8 x1,u8 y1,u8 x2,u8 y2);              //画线
 void OLED_ColorTurn(u8 i);                                //显示模式
 void OLED_ShowChar(u8 x,u8 y,u8 chr,u8 size);             //显示字符
 void OLED_ShowString(u8 x,u8 y,char *chr,u8 size);        //显示字符串
-void OLED_ShowNum(u8 x,u8 y,int num,u8 size);             //显示数字
+void OLED_ShowNum(u8 x,u8 y,float num,u8 size);           //显示数字
 void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[]);  //显示图片
 
 #endif

@@ -10,6 +10,7 @@ D0->时钟线(SCK) D1->数据线(MOSI) RES->命令/数据标志位(复位) DC->命令/数据标志位
 
 #include "oled.h"
 #include "oledfont.h"
+#include "stdio.h"
 
 u8 OLED_GRAM[128][8];       //显存
 
@@ -71,9 +72,10 @@ void OLED_Clear(void) {                  //清屏函数
 		OLED_WR_Byte(0x00,OLED_CMD);     //设置列起始地址
 		OLED_WR_Byte(0x10,OLED_CMD);     //设置高列起始地址
 		for(j=0;j<128;++j) {
-			OLED_WR_Byte(0x00,OLED_DATA); //灭
+			OLED_GRAM[j][i]=0;           //清除所有数据
 		}
 	}
+	OLED_Refresh();
 }
  
 void OLED_Full(void) {                   //全亮
@@ -83,9 +85,10 @@ void OLED_Full(void) {                   //全亮
 		OLED_WR_Byte(0x00,OLED_CMD);     //设置低列起始地址
 		OLED_WR_Byte(0x10,OLED_CMD);     //设置高列起始地址
 		for(j=0;j<128;++j) {
-			OLED_WR_Byte(0xFF,OLED_DATA); //亮
+			OLED_GRAM[j][i]=0;           //全亮所有数据
 		}
 	}
+	OLED_Refresh();
 }
 
 void OLED_Reset(void) {
@@ -211,9 +214,9 @@ void OLED_ShowString(u8 x,u8 y,char *chr,u8 size) {     //显示字符串
 	}
 }
 
-void OLED_ShowNum(u8 x,u8 y,int num,u8 size) {        //显示数字
-	char buf[100];                                    //存放数字字符
-	sprintf(buf,"%d",num);                            //格式化数字转字符
+void OLED_ShowNum(u8 x,u8 y,float num,u8 size) {      //显示数字
+	char buf[20]={0};                                    //存放数字字符
+	sprintf(buf,"%lf",num);                           //格式化数字转字符
 	OLED_ShowString(x,y,buf,size);                    //显示字符
 }
 
