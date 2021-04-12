@@ -3,7 +3,7 @@
 @brief    工程主函数文件
 @author   石国强
 @version  V1.0
-@introduction 陀螺仪、计步器测试任务
+@introduction 测温任务
 *****************************************************************************************/
 
 //UCOSIII中以下优先级用户程序不能使用，ALIENTEK
@@ -24,6 +24,10 @@
 #include "mpu6050.h"
 #include "inv_mpu.h"
 #include "stdio.h"
+#include "adc.h"
+#include "math.h"
+#include "usart.h"
+#include "mymath.h"
 
 //start任务
 //任务优先级
@@ -80,6 +84,8 @@ int main() {
 	LED_Init();         //硬件初始化
 	BEEP_Init();        //蜂鸣器初始化
 	OLED_Init();        //OLED初始化
+	Adc_Init();		    //ADC初始化	
+	uart_init(115200);  //串口初始化
 	//OLED_ShowNum(0,0,-123.22,16);
 	//OLED_Refresh();
 	MPU6050_Init();     //MPU6050初始化
@@ -190,9 +196,8 @@ void led_task(void *p_arg) {
 
 //oled任务函数
 void oled_task(void *p_arg) {
-	u8 i,size;
-	char buf[3][20]={0};
-//	float pitch,roll,yaw;  
+	float temp,temp2;
+	char buf[20]={0};
 	OS_ERR err;
 	p_arg = p_arg;
 	OLED_Clear();                                               //OLED清屏
@@ -208,24 +213,15 @@ void oled_task(void *p_arg) {
 	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);      //延时500ms
 	OLED_Clear();                                               //清屏
 	while(1) {
-//		while(mpu_dmp_get_data(&pitch,&roll,&yaw)!=0)
-//			OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err); 
-//		sprintf(buf[0],"pitch:%f",pitch);
-//		sprintf(buf[1],"roll:%f",roll);
-//		sprintf(buf[2],"yaw:%f",yaw);
-//		size=12;
-//		for(i=0;i<3;++i) {
-//			OLED_ShowString(0,0+(size/8+(size%8?1:0))*8*i,buf[i],size);
-//		}
-		MPU_Step_Count();
-		sprintf(buf[0],"Sports:%d step",(int)walk.step);         //显示步数
-		sprintf(buf[1],"Distance:%.0f m",walk.distance);         //显示距离
-		size=16;
-		for(i=0;i<2;++i) {
-			OLED_ShowString(0,0+(size/8+(size%8?1:0))*8*i,buf[i],size);
-		}		
+		temp2=(float)Get_Adc_Average(ADC_Channel_1,20)*(3.3/4096); //平均数滤波
+		temp=(float)Get_Adc_Middle(ADC_Channel_1,500)*(3.3/4096);  //ADC中位数滤波值获取
+		temp2=212.009-193*temp2;                                   //计算实际温度
+		temp=212.009-193*temp;
+		sprintf(buf,"temputre:%.2f",temp);                         
+		printf("%.2f,%.2f\r\n",temp2,temp);
+		OLED_ShowString(0,0,buf,16);
 		OLED_Refresh(); 
-		OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);     //延时5ms
+		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms
 	}
 }
 
