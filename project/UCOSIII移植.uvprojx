@@ -366,7 +366,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\src\main;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\CMSIS\CoreSupport;..\lib\STM32F10x_StdPeriph_Driver\inc;..\lib\UCOSIII\uC-CPU;..\lib\UCOSIII\uC-LIB;..\lib\UCOSIII\uCOS-III;..\lib\UCOSIII\UCOS_BSP;..\lib\UCOSIII\uCOS_CONFIG;..\lib\UCOSIII\uCOS-III\Source;..\lib\UCOSIII\uC-CPU\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uC-LIB\Ports\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uCOS-III\Ports\ARM-Cortex-M3\Generic\RealView;..\src\drivers\inc;..\src\system\delay;..\src\system\sys;..\src\system\usart</IncludePath>
+              <IncludePath>..\src\main;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\CMSIS\CoreSupport;..\lib\STM32F10x_StdPeriph_Driver\inc;..\lib\UCOSIII\uC-CPU;..\lib\UCOSIII\uC-LIB;..\lib\UCOSIII\uCOS-III;..\lib\UCOSIII\UCOS_BSP;..\lib\UCOSIII\uCOS_CONFIG;..\lib\UCOSIII\uCOS-III\Source;..\lib\UCOSIII\uC-CPU\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uC-LIB\Ports\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uCOS-III\Ports\ARM-Cortex-M3\Generic\RealView;..\src\drivers\inc;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\math\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -843,6 +843,16 @@
               <FileName>usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\system\usart\usart.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>math</GroupName>
+          <Files>
+            <File>
+              <FileName>mymath.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\lib\math\src\mymath.c</FilePath>
             </File>
           </Files>
         </Group>

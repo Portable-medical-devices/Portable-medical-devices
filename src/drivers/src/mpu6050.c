@@ -11,8 +11,6 @@
 #include "inv_mpu.h"
 #include "inv_mpu_dmp_motion_driver.h" 
 
-Walk walk;                                      //行走属性
-
 void MPU6050_Init(void) {                       //MPU6050初始化
 	MPU_I2C_Init();                             //初始化I2C总线
 	MPU6050_Write_Reg(PWR_MGMT_1,0x80);         //复位MPU6050
@@ -126,7 +124,7 @@ u8 MPU_Read_Len(u8 addr,u8 reg,u8 len,u8 *buf) {    //连续读多个数据
 }
 
 void MPU_Step_Count(void) {                          //获取行走属性
-	dmp_get_pedometer_step_count(&walk.step);       //获取行走步数
-	walk.distance=0.6*walk.step;                    //获取距离
+	dmp_get_pedometer_step_count(&user.walk.step);       //获取行走步数
+	user.walk.distance=0.6*user.walk.step;                    //获取距离
 }
 

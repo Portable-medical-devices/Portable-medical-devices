@@ -231,3 +231,24 @@ void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[]) {   //œ‘ æÕº∆¨
 	}
 	
 }
+
+#define UCOS
+
+void OLED_ShowFunction(float data) {                       //œ‘ æ≤®–Œ
+	int index,i,j;
+	static u8 front=0,back=127;
+	static u8 GRAM[128]={0};
+	OLED_Clear(); 
+	GRAM[back]=data;
+	i=front,j=back;
+	index=0;
+	while(i!=j) {
+		OLED_DrawPoint(index,(63-GRAM[i]-20)*2);
+		i=(i+1)%128;
+		index++;
+	}
+	GRAM[front]=0;
+	back=(back+1)%128;
+	front=(front+1)%128;
+	OLED_Refresh(); 
+}

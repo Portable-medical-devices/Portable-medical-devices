@@ -11,6 +11,7 @@
 
 #include "iic.h"
 #include "sys.h"
+#include "user.h"
 
 #define X_ACCEL_OFFSET  930
 #define Y_ACCEL_OFFSET  60
@@ -51,13 +52,6 @@
 #define PWR_MGMT_1 0x6B   //电源管理,典型值:0x00(正常启用)
 #define WHO_AM_I   0x75   //IIC地址寄存器(默认0x68，只读)
 #define SlaveAddress 0xD0 //IIC写入时的地址字节数据+1位读取
-
-typedef struct {
-	unsigned long   step;           //步数
-	float           distance;       //距离
-}Walk;
-
-extern Walk walk;         //行走属性
 
 void MPU6050_Init(void);                                     //MPU6050初始化
 void MPU6050_Write_Reg(uint8_t regAddr, uint8_t regData);    //向寄存器中写数据

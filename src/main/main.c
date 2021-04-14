@@ -13,21 +13,9 @@
 //优先级2：定时任务 OS_TmrTask()
 //优先级OS_CFG_PRIO_MAX-2：统计任务 OS_StatTask()
 //优先级OS_CFG_PRIO_MAX-1：空闲任务 OS_IdleTask()
+#include "user.h"
 
-#include "stm32f10x.h"
-#include "includes.h"
-#include "led.h"
-#include "beep.h"
-#include "delay.h"
-#include "oled.h"
-#include "oledbmp.h"
-#include "mpu6050.h"
-#include "inv_mpu.h"
-#include "stdio.h"
-#include "adc.h"
-#include "math.h"
-#include "usart.h"
-#include "mymath.h"
+__align(8)
 
 //start任务
 //任务优先级
@@ -41,54 +29,39 @@ CPU_STK START_TASK_STK[START_STK_SIZE];
 //任务函数
 void start_task(void *p_arg);
 
-//led任务
-//任务优先级
-#define LED_TASK_PRIO		7
-//任务堆栈大小	
-#define LED_STK_SIZE 		128
-//任务控制块
-OS_TCB LedTaskTCB;
-//任务堆栈	
-CPU_STK LED_TASK_STK[LED_STK_SIZE];
-void led_task(void *p_arg);
-
-//beep任务
-//任务优先级
-#define BEEP_TASK_PRIO		5
-//任务堆栈大小	
-#define BEEP_STK_SIZE 		128
-//任务控制块
-OS_TCB BeepTaskTCB;
-//任务堆栈	
-CPU_STK BEEP_TASK_STK[BEEP_STK_SIZE];
-void beep_task(void *p_arg);
-
 //OLED任务
 //任务优先级
-#define OLED_TASK_PRIO		6
+#define OLED_TASK_PRIO		4
 //任务堆栈大小	
-#define OLED_STK_SIZE 		500
+#define OLED_STK_SIZE 		1024
 //任务控制块
 OS_TCB OledTaskTCB;
 //任务堆栈	
 CPU_STK OLED_TASK_STK[OLED_STK_SIZE];
 void oled_task(void *p_arg);
 
+//任务优先级
+#define KEYPROCESS_TASK_PRIO 	3
+//任务堆栈大小	
+#define KEYPROCESS_STK_SIZE 	128
+//任务控制块
+OS_TCB Keyprocess_TaskTCB;
+//任务堆栈	
+CPU_STK KEYPROCESS_TASK_STK[KEYPROCESS_STK_SIZE];
+//任务函数
+void Keyprocess_task(void *p_arg);
+
+////////////////////////消息队列//////////////////////////////
+#define KEYMSG_Q_NUM	1	//按键消息队列的数量
+OS_Q KEY_Msg;				//定义一个消息队列，用于按键消息传递，模拟消息邮箱
+
 int main() {
 	OS_ERR err;
 	CPU_SR_ALLOC();
 	delay_init();
-	
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); //中断分组
-	
-	LED_Init();         //硬件初始化
-	BEEP_Init();        //蜂鸣器初始化
-	OLED_Init();        //OLED初始化
-	Adc_Init();		    //ADC初始化	
-	uart_init(115200);  //串口初始化
-	//OLED_ShowNum(0,0,-123.22,16);
-	//OLED_Refresh();
-	MPU6050_Init();     //MPU6050初始化
+	Software_Init();    //软件初始化
+	Dirver_Init();      //硬件初始化
 	OSInit(&err);	    //初始化UCOSIII
 	OS_CRITICAL_ENTER();//进入临界区
 	//创建开始任务
@@ -131,36 +104,12 @@ void start_task(void *p_arg)
 	OSSchedRoundRobinCfg(DEF_ENABLED,1,&err);  
 #endif		
 	
-	OS_CRITICAL_ENTER();	//进入临界区
-	//创建LED任务
-	OSTaskCreate((OS_TCB 	* )&LedTaskTCB,		
-				 (CPU_CHAR	* )"led task", 		
-                 (OS_TASK_PTR )led_task, 			
-                 (void		* )0,					
-                 (OS_PRIO	  )LED_TASK_PRIO,     
-                 (CPU_STK   * )&LED_TASK_STK[0],	
-                 (CPU_STK_SIZE)LED_STK_SIZE/10,	
-                 (CPU_STK_SIZE)LED_STK_SIZE,		
-                 (OS_MSG_QTY  )0,					
-                 (OS_TICK	  )0,					
-                 (void   	* )0,					
-                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
-                 (OS_ERR 	* )&err);				
-				 
-	//创建BEEP
-	OSTaskCreate((OS_TCB 	* )&BeepTaskTCB,		
-				 (CPU_CHAR	* )"beeptask", 		
-                 (OS_TASK_PTR )beep_task, 			
-                 (void		* )0,					
-                 (OS_PRIO	  )BEEP_TASK_PRIO,     	
-                 (CPU_STK   * )&BEEP_TASK_STK[0],	
-                 (CPU_STK_SIZE)BEEP_STK_SIZE/10,	
-                 (CPU_STK_SIZE)BEEP_STK_SIZE,		
-                 (OS_MSG_QTY  )0,					
-                 (OS_TICK	  )0,					
-                 (void   	* )0,				
-                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
-                 (OS_ERR 	* )&err);	
+	OS_CRITICAL_ENTER();	//进入临界区			
+	//创建消息队列KEY_Msg
+	OSQCreate ((OS_Q*		)&KEY_Msg,	//消息队列
+                (CPU_CHAR*	)"KEY Msg",	//消息队列名称
+                (OS_MSG_QTY	)KEYMSG_Q_NUM,	//消息队列长度，这里设置为1
+                (OS_ERR*	)&err);		//错误码
 	//创建OLED
 	OSTaskCreate((OS_TCB 	* )&OledTaskTCB,		
 				 (CPU_CHAR	* )"oledtask", 		
@@ -175,7 +124,20 @@ void start_task(void *p_arg)
                  (void   	* )0,				
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR, 
                  (OS_ERR 	* )&err);	
-			 							 
+	//创建按键任务
+	OSTaskCreate((OS_TCB 	* )&Keyprocess_TaskTCB,		
+				 (CPU_CHAR	* )"Keyprocess task", 		
+                 (OS_TASK_PTR )Keyprocess_task, 			
+                 (void		* )0,					
+                 (OS_PRIO	  )KEYPROCESS_TASK_PRIO,     
+                 (CPU_STK   * )&KEYPROCESS_TASK_STK[0],	
+                 (CPU_STK_SIZE)KEYPROCESS_STK_SIZE/10,	
+                 (CPU_STK_SIZE)KEYPROCESS_STK_SIZE,		
+                 (OS_MSG_QTY  )0,					
+                 (OS_TICK	  )0,  					
+                 (void   	* )0,					
+                 (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
+                 (OS_ERR 	* )&err);	 							 
 	OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//挂起开始任务			 
 	OS_CRITICAL_EXIT();	//退出临界区
 }
@@ -196,50 +158,59 @@ void led_task(void *p_arg) {
 
 //oled任务函数
 void oled_task(void *p_arg) {
-	float temp,temp2;
-	char buf[20]={0};
+//	double temp;
+//	char buf[20]={0};
+	u8 *key,menu_y=0;                                            //判断按键状态
+	OS_MSG_SIZE size;
 	OS_ERR err;
 	p_arg = p_arg;
-	OLED_Clear();                                               //OLED清屏
-	OLED_ShowPicture(0,0,128,8,LOGO);                           //显示LOGO
-	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);      //延时500ms
-	OLED_ShowString(0,0," MPU6050 [init]",16);
-	OLED_Refresh();                                             //OLED刷屏
-	while(mpu_dmp_init()) {                                     //DMP初始化
-		OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms
-	}
-	OLED_ShowString(0,0," MPU6050 [OK]  ",16);
-	OLED_Refresh();                                             //OLED刷屏
-	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);      //延时500ms
+	Show_Logo();                                                //显示LOGO
+	Show_LMT70_Init();                                          //LMT70初始化
+	Show_MPU6050_Init();                                        //MPU6050初始化
+	OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);        //延时1s
 	OLED_Clear();                                               //清屏
+	Show_Menu();                                                //显示菜单
 	while(1) {
-		temp2=(float)Get_Adc_Average(ADC_Channel_1,20)*(3.3/4096); //平均数滤波
-		temp=(float)Get_Adc_Middle(ADC_Channel_1,500)*(3.3/4096);  //ADC中位数滤波值获取
-		temp2=212.009-193*temp2;                                   //计算实际温度
-		temp=212.009-193*temp;
-		sprintf(buf,"temputre:%.2f",temp);                         
-		printf("%.2f,%.2f\r\n",temp2,temp);
-		OLED_ShowString(0,0,buf,16);
-		OLED_Refresh(); 
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms
-	}
-}
-
-//beep任务函数
-void beep_task(void *p_arg) {
-	int i;
-	OS_ERR err;
-	p_arg = p_arg;
-	while(1) {
-		for(i=0;i<10;++i) {
-			BEEP(1);
-			OSTimeDlyHMSM(0,0,0,25,OS_OPT_TIME_HMSM_STRICT,&err); //延时50ms
-			BEEP(0);
-			OSTimeDlyHMSM(0,0,0,25,OS_OPT_TIME_HMSM_STRICT,&err); //延时50ms
+		//请求消息KEY_Msg
+		key=OSQPend((OS_Q*			)&KEY_Msg,   
+					(OS_TICK		)0,
+                    (OS_OPT			)OS_OPT_PEND_BLOCKING,
+                    (OS_MSG_SIZE*	)&size,		
+                    (CPU_TS*		)0,
+                    (OS_ERR*		)&err);
+		switch(*key) {
+			case KEY1_PERS:
+				OLED_Clear();
+				Show_Menu();
+				menu_y=menu_y+20;
+				if(menu_y==60) menu_y=0;
+				break;
+			case KEY2_PERS:
+				Change_Mode(menu_y);
+				Applicaton();
+				Software_Init(); 
+				OLED_Clear();
+				Show_Menu();
+				break;
 		}
-		OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);    //延时500ms
+		OLED_ShowString(16,menu_y,"=>",16);
+		OLED_Refresh();
+		OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms 
 	}
 }
 
-
+void Keyprocess_task(void *p_arg) {	
+	u8 key;
+	OS_ERR err;
+	while(1){
+		//发送消息
+		key=Scan_Key();
+		OSQPost((OS_Q*		)&KEY_Msg,		
+				(void*		)&key,
+				(OS_MSG_SIZE)1,
+				(OS_OPT		)OS_OPT_POST_FIFO,
+				(OS_ERR*	)&err);
+		OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_PERIODIC,&err);   //延时5ms
+	}
+}
 
