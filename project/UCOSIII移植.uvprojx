@@ -366,7 +366,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\src\main;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\CMSIS\CoreSupport;..\lib\STM32F10x_StdPeriph_Driver\inc;..\lib\UCOSIII\uC-CPU;..\lib\UCOSIII\uC-LIB;..\lib\UCOSIII\uCOS-III;..\lib\UCOSIII\UCOS_BSP;..\lib\UCOSIII\uCOS_CONFIG;..\lib\UCOSIII\uCOS-III\Source;..\lib\UCOSIII\uC-CPU\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uC-LIB\Ports\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uCOS-III\Ports\ARM-Cortex-M3\Generic\RealView;..\src\drivers\inc;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\math\inc</IncludePath>
+              <IncludePath>..\src\main;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\CMSIS\CoreSupport;..\lib\STM32F10x_StdPeriph_Driver\inc;..\lib\UCOSIII\uC-CPU;..\lib\UCOSIII\uC-LIB;..\lib\UCOSIII\uCOS-III;..\lib\UCOSIII\UCOS_BSP;..\lib\UCOSIII\uCOS_CONFIG;..\lib\UCOSIII\uCOS-III\Source;..\lib\UCOSIII\uC-CPU\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uC-LIB\Ports\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uCOS-III\Ports\ARM-Cortex-M3\Generic\RealView;..\src\drivers\inc;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\math\inc;..\src\user</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -468,6 +468,16 @@
               <FileName>adc.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\drivers\src\adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\drivers\src\key.c</FilePath>
+            </File>
+            <File>
+              <FileName>oledbmp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\drivers\src\oledbmp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -853,6 +863,16 @@
               <FileName>mymath.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\lib\math\src\mymath.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>user</GroupName>
+          <Files>
+            <File>
+              <FileName>user.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\user\user.c</FilePath>
             </File>
           </Files>
         </Group>
