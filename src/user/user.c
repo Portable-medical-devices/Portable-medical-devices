@@ -17,6 +17,7 @@ void Dirver_Init(void) {         //硬件初始化
 	Adc_Init();		             //ADC初始化	
 	uart_init(115200);           //串口初始化
 	MPU6050_Init();              //MPU6050初始化
+	HC05_Init(115200);           //蓝牙模块初始化
 }
 
 void Show_Logo(void) {           //显示Logo
@@ -31,12 +32,13 @@ void Show_LMT70_Init(void) {                       //显示初始化LMT70
 	volatile float temp;
 	OLED_ShowString(0,0," LMT70 [init]",16);       //显示LMT70初始化
 	OLED_Refresh();                                //OLED刷屏
-	temp=(float)Get_Adc_Middle(ADC_Channel_1,500)*(3.3/4096);   //ADC中位数滤波值获取
-	temp=212.009-193*temp;
-	if(temp>=0&&temp<=50) OLED_ShowString(0,0," LMT70   [OK]",16);
-	else while(1) {OLED_ShowString(0,0," LMT70 [ERROR]",16);}
+	while(temp<0||temp>50) {
+		temp=(float)Get_Adc_Middle(ADC_Channel_1,500)*(3.3/4096);   //ADC中位数滤波值获取
+		temp=212.009-193*temp;
+	}
+	OLED_ShowString(0,0," LMT70   [OK]",16);
 	OLED_Refresh(); 
-	OSTimeDlyHMSM(0,0,0,200,OS_OPT_TIME_HMSM_STRICT,&err);        //延时200ms
+	OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);        //延时200ms
 }
 
 void Show_MPU6050_Init(void) {      //显示初始化MPU6050
@@ -47,6 +49,26 @@ void Show_MPU6050_Init(void) {      //显示初始化MPU6050
 		OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms
 	}
 	OLED_ShowString(0,16," MPU6050 [OK]  ",16);
+	OLED_Refresh();
+	OSTimeDlyHMSM(0,0,0,100,OS_OPT_TIME_HMSM_STRICT,&err);
+}
+
+void Show_HC05_Init(void) {         //显示初始化HC05
+	OS_ERR err;
+	char buf[]="123";
+	int len=0;
+	OLED_ShowString(0,32," HC-05   [init]",16);
+	OLED_Refresh();
+	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms
+//	while(1) {
+//		HC05_Send_Data(buf,3);
+//		if(USART2_RX_STA&0x8000) {
+//			len=USART2_RX_STA&0x3fff;     //获取长度
+//			//////////////////////////////////////////
+//			USART2_RX_STA=0;
+//		}
+//	}
+	OLED_ShowString(0,32," HC-05   [OK]  ",16);
 	OLED_Refresh();
 }
 
@@ -72,7 +94,7 @@ u8   Scan_Key(void) {               //扫描按键
 void Show_Menu(void) {              //显示菜单
 	OLED_ShowString(32,0," Temputre",16);
 	OLED_ShowString(32,20," Step",16);
-	OLED_ShowString(32,40," Hart",16);
+	OLED_ShowString(32,40," Heart",16);
 	OLED_Refresh();
 }
 

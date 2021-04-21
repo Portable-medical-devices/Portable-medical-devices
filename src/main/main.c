@@ -167,6 +167,7 @@ void oled_task(void *p_arg) {
 	Show_Logo();                                                //显示LOGO
 	Show_LMT70_Init();                                          //LMT70初始化
 	Show_MPU6050_Init();                                        //MPU6050初始化
+	Show_HC05_Init();                                           //蓝牙初始化
 	OSTimeDlyHMSM(0,0,1,0,OS_OPT_TIME_HMSM_STRICT,&err);        //延时1s
 	OLED_Clear();                                               //清屏
 	Show_Menu();                                                //显示菜单

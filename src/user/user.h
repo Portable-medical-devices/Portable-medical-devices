@@ -24,6 +24,7 @@
 #include "includes.h"
 #include "stm32f10x.h"
 #include "key.h"
+#include "hc05.h"
 
 typedef enum {
 	TEMPUTRE_MODE,
@@ -48,6 +49,7 @@ void Dirver_Init(void);            //硬件初始化
 void Show_Logo(void);              //显示Logo
 void Show_LMT70_Init(void);        //显示初始化LMT70
 void Show_MPU6050_Init(void);      //显示初始化MPU6050
+void Show_HC05_Init(void);         //显示初始化HC05
 void Show_Menu(void);              //显示菜单
 void Show_Temputre(void);          //显示温度
 void Show_Step(void);              //显示移动信息
