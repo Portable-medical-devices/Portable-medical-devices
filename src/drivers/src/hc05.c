@@ -29,7 +29,7 @@ void HC05_Init(u32 bound) {                           //蓝牙模块初始化
 	GPIO_Init(GPIOA,&GPIO_InitStructure);              //初始化PA2
 	//USART_RX PA3
 	GPIO_InitStructure.GPIO_Pin=GPIO_Pin_3;            //Pin3
-	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_IN_FLOATING;//浮空输入
+	GPIO_InitStructure.GPIO_Mode=GPIO_Mode_IPU;        //输入上拉
 	GPIO_Init(GPIOA,&GPIO_InitStructure);              //初始化PA3
 	//USART2 NVIC设置
 	NVIC_InitStructure.NVIC_IRQChannel=USART2_IRQn;
@@ -59,21 +59,21 @@ void USART2_IRQHandler(void)                	//串口1中断服务程序
 		{
 		Res =USART_ReceiveData(USART2);//(USART2->DR);	//读取接收到的数据
 		
-		if((USART_RX_STA&0x8000)==0)//接收未完成
+		if((USART2_RX_STA&0x8000)==0)//接收未完成
 			{
-			if(USART_RX_STA&0x4000)//接收到了0x0d
+			if(USART2_RX_STA&0x4000)//接收到了0x0d
 				{
-				if(Res!=0x0a)USART_RX_STA=0;//接收错误,重新开始
-				else USART_RX_STA|=0x8000;	//接收完成了 
+				if(Res!=0x0a)USART2_RX_STA=0;//接收错误,重新开始
+				else USART2_RX_STA|=0x8000;	//接收完成了 
 				}
 			else //还没收到0X0D
 				{	
-				if(Res==0x0d)USART_RX_STA|=0x4000;
+				if(Res==0x0d)USART2_RX_STA|=0x4000;
 				else
 					{
-					USART_RX_BUF[USART_RX_STA&0X3FFF]=Res ;
-					USART_RX_STA++;
-					if(USART_RX_STA>(USART_REC_LEN-1))USART_RX_STA=0;//接收数据错误,重新开始接收	  
+					USART2_RX_BUF[USART2_RX_STA&0X3FFF]=Res ;
+					USART2_RX_STA++;
+					if(USART2_RX_STA>(USART2_REC_LEN-1))USART2_RX_STA=0;//接收数据错误,重新开始接收	  
 					}		 
 				}
 			}   		 

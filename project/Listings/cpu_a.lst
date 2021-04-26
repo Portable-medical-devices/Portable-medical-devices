@@ -462,11 +462,10 @@ ARM Macro Assembler    Page 8
   289 00000034         
   290 00000034                 END
 Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
-ork --depend=..\obj\cpu_a.d -o..\obj\cpu_a.o -ID:\Desktop\TEMP\ÏîÄ¿¿â\Portable-
-medical-devices\project\RTE -ID:\MDK5\ARM\PACK\Keil\STM32F1xx_DFP\1.0.5\Device\
-Include -ID:\MDK5\ARM\CMSIS\Include --predefine="__UVISION_VERSION SETA 514" --
-predefine="STM32F10X_MD SETA 1" --list=.\listings\cpu_a.lst ..\lib\UCOSIII\uC-C
-PU\ARM-Cortex-M3\RealView\cpu_a.asm
+ork --depend=..\obj\cpu_a.d -o..\obj\cpu_a.o -IF:\Arm\Packs\Keil\STM32F1xx_DFP\
+1.0.5\Device\Include --predefine="__UVISION_VERSION SETA 534" --predefine="STM3
+2F10X_MD SETA 1" --list=.\listings\cpu_a.lst ..\lib\UCOSIII\uC-CPU\ARM-Cortex-M
+3\RealView\cpu_a.asm
 
 
 
