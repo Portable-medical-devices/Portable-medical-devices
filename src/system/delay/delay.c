@@ -224,7 +224,19 @@ void delay_ms(u16 nms)
 #endif 
 
 
-
+void delay_s(u8 s)
+{
+	delay_ms(s*100);//1
+	delay_ms(s*100);//2
+	delay_ms(s*100);//3
+	delay_ms(s*100);//4
+	delay_ms(s*100);//5
+	delay_ms(s*100);//6
+	delay_ms(s*100);//7
+	delay_ms(s*100);//8
+	delay_ms(s*100);//9
+	delay_ms(s*100);//10
+}
 
 
 

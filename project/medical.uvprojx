@@ -337,9 +337,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
+              <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER,ARM_MATH_CM3</Define>
               <Undefine></Undefine>
-              <IncludePath>..\src\main;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\CMSIS\CoreSupport;..\lib\STM32F10x_StdPeriph_Driver\inc;..\lib\UCOSIII\uC-CPU;..\lib\UCOSIII\uC-LIB;..\lib\UCOSIII\uCOS-III;..\lib\UCOSIII\UCOS_BSP;..\lib\UCOSIII\uCOS_CONFIG;..\lib\UCOSIII\uCOS-III\Source;..\lib\UCOSIII\uC-CPU\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uC-LIB\Ports\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uCOS-III\Ports\ARM-Cortex-M3\Generic\RealView;..\src\drivers\inc;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\math\inc;..\src\user</IncludePath>
+              <IncludePath>..\src\main;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\STM32F10x_StdPeriph_Driver\inc;..\lib\UCOSIII\uC-CPU;..\lib\UCOSIII\uC-LIB;..\lib\UCOSIII\uCOS-III;..\lib\UCOSIII\UCOS_BSP;..\lib\UCOSIII\uCOS_CONFIG;..\lib\UCOSIII\uCOS-III\Source;..\lib\UCOSIII\uC-CPU\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uC-LIB\Ports\ARM-Cortex-M3\RealView;..\lib\UCOSIII\uCOS-III\Ports\ARM-Cortex-M3\Generic\RealView;..\src\drivers\inc;..\src\system\delay;..\src\system\sys;..\src\system\usart;..\lib\math\inc;..\src\user;..\lib\dsp\Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -457,6 +457,26 @@
               <FileName>hc05.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\drivers\src\hc05.c</FilePath>
+            </File>
+            <File>
+              <FileName>ads1292.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\drivers\src\ads1292.c</FilePath>
+            </File>
+            <File>
+              <FileName>spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\drivers\src\spi.c</FilePath>
+            </File>
+            <File>
+              <FileName>fdacoefs.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\drivers\src\fdacoefs.c</FilePath>
+            </File>
+            <File>
+              <FileName>dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\drivers\src\dma.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -855,6 +875,16 @@
             </File>
           </Files>
         </Group>
+        <Group>
+          <GroupName>dsp_lib</GroupName>
+          <Files>
+            <File>
+              <FileName>arm_cortexM3l_math.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\lib\dsp\arm_cortexM3l_math.lib</FilePath>
+            </File>
+          </Files>
+        </Group>
       </Groups>
     </Target>
   </Targets>
@@ -889,5 +919,14 @@
       </file>
     </files>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>medical</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>

@@ -243,7 +243,7 @@ void OLED_ShowFunction(float data) {                       //œ‘ æ≤®–Œ
 	i=front,j=back;
 	index=0;
 	while(i!=j) {
-		OLED_DrawPoint(index,(63-GRAM[i]-20)*2);
+		OLED_DrawPoint(index,63-GRAM[i]);
 		i=(i+1)%128;
 		index++;
 	}
