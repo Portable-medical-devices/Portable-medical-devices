@@ -252,3 +252,20 @@ void OLED_ShowFunction(float data) {                       //显示波形
 	front=(front+1)%128;
 	OLED_Refresh(); 
 }
+
+void OLED_ShowTimesFunction(u8 times,float data) {                       //显示波形
+	static u8 buf[130]={0};
+	u8 i,j;
+	OLED_Clear();
+	for(i=0;i<128-times;i+=times) {
+		buf[i]=buf[i+times];
+	}
+	buf[i]=data;
+	for(j=0;j<128;j+=times) {
+		OLED_DrawPoint(j,63-buf[j]);
+	}
+	for(i=0;i<128-times;i+=times) {
+		OLED_DrawLine(i,63-buf[i],i+times,63-buf[i+times]);
+	}
+	OLED_Refresh();
+}

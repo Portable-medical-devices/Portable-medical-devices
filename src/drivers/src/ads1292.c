@@ -49,12 +49,16 @@ void ADS1292_Init(void)
 		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;//推挽输出
 		GPIO_Init(GPIOB, &GPIO_InitStructure);	
 		
-//		//RESRT
-//		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0;
-//		GPIO_Init(GPIOA, &GPIO_InitStructure);	
-//		//START
-//		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
-//		GPIO_Init(GPIOA, &GPIO_InitStructure);	
+		//RESRT
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;//推挽输出
+		GPIO_Init(GPIOB, &GPIO_InitStructure);	
+		//START
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;
+		GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;//推挽输出
+		GPIO_Init(GPIOB, &GPIO_InitStructure);	
 //		//CLKSEL
 //		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3;
 //		GPIO_Init(GPIOA, &GPIO_InitStructure);		

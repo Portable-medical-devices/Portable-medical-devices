@@ -59,6 +59,7 @@ void OLED_ShowString(u8 x,u8 y,char *chr,u8 size);        //显示字符串
 void OLED_ShowNum(u8 x,u8 y,float num,u8 size);           //显示数字
 void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[]);  //显示图片
 void OLED_ShowFunction(float data);                       //显示波形
+void OLED_ShowTimesFunction(u8 times,float data);
 
 #endif
 

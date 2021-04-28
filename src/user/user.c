@@ -105,17 +105,17 @@ void Show_HC05_Init(void) {         //显示初始化HC05
 	OLED_ShowString(0,32," HC-05   [init]",16);
 	OLED_Refresh();
 	//OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5m
-//	while(1) {
-//		//HC05_Send_Data((u8 *)buf,3);
-//		if(USART2_RX_STA&0x8000) {
-//			len=USART2_RX_STA&0x3fff;     //获取长度
-//			USART2_RX_BUF[len]=0;
-//			USART2_RX_STA=0;
-//			if(!strcmp(buf,(char *)USART2_RX_BUF)) break;
-//			//////////////////////////////////////////
-//		}
+	while(1) {
+		//HC05_Send_Data((u8 *)buf,3);
+		if(USART2_RX_STA&0x8000) {
+			len=USART2_RX_STA&0x3fff;     //获取长度
+			USART2_RX_BUF[len]=0;
+			USART2_RX_STA=0;
+			if(!strcmp(buf,(char *)USART2_RX_BUF)) break;
+			//////////////////////////////////////////
+		}
 		OSTimeDlyHMSM(0,0,0,10,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms
-//	}
+	}
 	HC05_Send_Data((u8 *)buf,3);
 	OLED_ShowString(0,32," HC-05   [OK]  ",16);
 	OLED_Refresh();
@@ -177,7 +177,18 @@ void Change_Mode(u8 y) {               //模式切换
 }
 
 void Applicaton(void) {             //应用
+	u8 i;
+	u8 sum=0;
 	static u32 times=0;
+	double volatile b=60;
+	double volatile a=16;
+	double volatile k;
+	double volatile Max=25000;
+	double volatile Min=1500;
+	u32 res;
+	data_to_send[0]=0xA5;	//25-32位
+
+	k=(b-a)/(Max-Min);
 	OLED_Clear();
 	while(!KEY2);
 	switch(user.mode) {
@@ -194,93 +205,51 @@ void Applicaton(void) {             //应用
 			}
 			break;
 		case HART_MODE:
-//			ecg_fir_tilter_init();				//fir滤波器初始化
-//			PBout(10)=1;
-//			PBout(11)=0;
-//			ADS1292_Init();	//初始化ads1292
-//			while(Set_ADS1292_Collect(0))//0 正常采集  //1 1mV1Hz内部侧试信号 //2 内部短接噪声测试
-//			{	
-//			//		delay_s(1);
-//			}
-//			//delay_s(1);				
-//			//TIM2_Init(10,7200);	//系统时基		
-//			EXTI->IMR |= EXTI_Line8;	//开DRDY中断（这句在买来ADS1292里就有的，没动）
 			EXTI->IMR |= EXTI_Line8;	//开DRDY中断（这句在买来ADS1292里就有的，没动）
 			while(1) {
-				if(ads1292_recive_flag)		//ADS1292采样到数据
-			{
-				cannle[0]=ads1292_Cache[3]<<16 | ads1292_Cache[4]<<8 | ads1292_Cache[5];//获取原始数据		
-				cannle[1]=ads1292_Cache[6]<<16 | ads1292_Cache[7]<<8 | ads1292_Cache[8];
-			
-				p_Temp[0] = get_volt(cannle[0]);	//把采到的3个字节转成有符号32位数
-				p_Temp[1] = get_volt(cannle[1]);	//把采到的3个字节转成有符号32位数
-				//这里是显示原始数据  将原始的信号发到上位机
-				//有符号数为再转为无符号，无符号数为逻辑右移
-//							data_to_send[4]=p_Temp[0] >>24;		//25-32位
-//							data_to_send[5]=p_Temp[0] >>16;  	//17-24
-//							data_to_send[6]=p_Temp[0] >>8;		//9-16
-//							data_to_send[7]=p_Temp[0];  			//1-8
-
-//							data_to_send[8]=p_Temp[1]>>24;		//25-32位
-//							data_to_send[9]=p_Temp[1]>>16;  	//17-24
-//							data_to_send[10]=p_Temp[1]>>8;		//9-16
-//							data_to_send[11]=p_Temp[1];			 //1-8
-//							
-//							for(i=0;i<12;i++)
-//									sum += data_to_send[i];							
-//							data_to_send[12] = sum;	//校验和																		
-//							DMA_Enable(DMA1_Channel4,13);//串口1DMA 
-//							sum=0;
-		
-				ecg_sum_temp += p_Temp[1];			//累加
-				ecg_sum_count++;					//计数
-				if(ecg_sum_count >= ecg_x_ratio)	//连续采样ecg_x_ratio次
-				{
-
-					ecg_avr = ecg_sum_temp/ecg_x_ratio;					//计算平均值
-											
-					if(filter_enable)
-					{
-						//使能FIR带通滤波
-						ecg_fir_res = (int32_t)ecg_fir_tilter(p_Temp[1]);		//FIR带通滤波
-//						printf("%d\t",ecg_fir_res);
-//							data_to_send[4]=p_Temp[1]>>24;		//25-32位
-//							data_to_send[5]=p_Temp[1]>>16;  	//17-24
-//							data_to_send[6]=p_Temp[1]>>8;		//9-16
-//							data_to_send[7]=p_Temp[1]; 			//1-8
-						k=1500;
-//						data_to_send[4]=(ecg_fir_res>>24)/k;		//25-32位
-//					  data_to_send[5]=(ecg_fir_res>>16)/k;  	//17-24
-//					  data_to_send[6]=(ecg_fir_res>>8)/k;		//9-16
-					  data_to_send[4]=(ecg_fir_res)/k;			 //1-8
-							
-						if(times>175) {
-							OLED_ShowFunction((data_to_send[4]-60)*2.5);
-						}
-						times++;
-						sum=0;
-					}
-					else
-					{
-						//失能FIR带通滤波
-						//osc_refresh(&ecg_win,ecg_x_value++,ecg_avr);	//刷新示波器串口（以屏幕像素点为单位）
-					}
-					ecg_sum_count = 0;	//计数清零
-					ecg_sum_temp = 0;	//求和清零
-				}
-				/***测量采样周期***/
-//				ecg_count++;
-//				if(ecg_count >=10000)
-//				{
-//					ecg_count = 0;
-//					LCD_ShowIntNum(0,200,sys_tick-ecg_tick,6,GREEN,BLACK,16);
-//					ecg_tick = sys_tick;
-//				}
-				/*****************/
+				if(ads1292_recive_flag)	{	//ADS1292采样到数据
+					cannle[0]=ads1292_Cache[3]<<16 | ads1292_Cache[4]<<8 | ads1292_Cache[5];//获取原始数据		
+					cannle[1]=ads1292_Cache[6]<<16 | ads1292_Cache[7]<<8 | ads1292_Cache[8];
 				
-				ads1292_recive_flag = 0;
-			}
-					if(KEY2==0) return;
+					p_Temp[0] = get_volt(cannle[0]);	//把采到的3个字节转成有符号32位数
+					p_Temp[1] = get_volt(cannle[1]);	//把采到的3个字节转成有符号32位数
+			
+					ecg_sum_temp += p_Temp[1];			//累加
+					ecg_sum_count++;					//计数
+					if(ecg_sum_count >= ecg_x_ratio) {	//连续采样ecg_x_ratio次
+						ecg_avr = ecg_sum_temp/ecg_x_ratio;					//计算平均值
+						if(filter_enable) {
+							//使能FIR带通滤波
+							ecg_fir_res = (int32_t)ecg_fir_tilter(p_Temp[1]);		//FIR带通滤波
+							ecg_fir_res+=7000;
+							ecg_fir_res=a+k*(ecg_fir_res-Min);            //数据归一化
+							data_to_send[1]=ecg_fir_res;
+							data_to_send[2]=ecg_fir_res;
+//							data_to_send[1]=(u8)ecg_fir_res&0x000000FF;
+//							data_to_send[2]=(u8)(ecg_fir_res>>8)&0x000000FF;
+//							data_to_send[3]=(u8)(ecg_fir_res>>16)&0x000000FF;
+//							data_to_send[4]=(u8)(ecg_fir_res>>24)&0x000000FF;
+//							sum=0;
+							//for(i=1;i<5;++i) sum=(u8)(sum+data_to_send[i]);
+//							data_to_send[5]=sum;
+							data_to_send[3]=0x5A;
+							 
+							
+
+							
+							if(times>175) {
+								//OLED_ShowFunction(res);
+								HC05_Send_Data(data_to_send,4);
+								OLED_ShowTimesFunction(2,ecg_fir_res);
+							}
+							times++;
+						}
+						ecg_sum_count = 0;	//计数清零
+						ecg_sum_temp = 0;	//求和清零
+					}
+					ads1292_recive_flag = 0;
+				}
+				if(KEY2==0) return;
 			}
 		case DEFAULT:
 			break;
