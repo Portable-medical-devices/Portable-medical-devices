@@ -38,8 +38,14 @@ uint32_t ecg_x_value = 0;	//ecg示波器横轴变量
 uint8_t ecg_x_ratio = 5 ;	//每次ECG数据都先经过ecg_x_ratio次求和求平均（相当于均值滤波），调整该值相当于调整采样频率
 uint32_t ecg_count = 0;		//每次采集ECG数据时，该值计数，用来实测ECG的采样周期
 uint8_t heart_rate = 0;		//心率
+u8 data_oled_ok=0;
+u8 data_send_ok=0;
 
-
+int ecg_max=0x80000000;             //获取峰值
+int ecg_min=0x7FFFFFFF;             //获取峰值
+int ecg_max_next=0x80000000;             //获取峰值
+int ecg_min_next=0x7FFFFFFF;             //获取峰值
+u8 ecg_thresh=0;          //阈值
 
 uint8_t filter_enable = 1;	//使能FIR滤波器
 
@@ -177,18 +183,19 @@ void Change_Mode(u8 y) {               //模式切换
 }
 
 void Applicaton(void) {             //应用
+	OS_ERR err;
 	u8 i;
 	u8 sum=0;
-	static u32 times=0;
-	double volatile b=60;
-	double volatile a=16;
-	double volatile k;
-	double volatile Max=25000;
-	double volatile Min=1500;
+	u8 flag=0;
+	u32 ecg_times=500;
+	static u32 times=200;
+	double volatile b=80;
+	double volatile a=10;
+	double volatile k=0;
 	u32 res;
 	data_to_send[0]=0xA5;	//25-32位
 
-	k=(b-a)/(Max-Min);
+	
 	OLED_Clear();
 	while(!KEY2);
 	switch(user.mode) {
@@ -221,35 +228,40 @@ void Applicaton(void) {             //应用
 						if(filter_enable) {
 							//使能FIR带通滤波
 							ecg_fir_res = (int32_t)ecg_fir_tilter(p_Temp[1]);		//FIR带通滤波
-							ecg_fir_res+=7000;
-							ecg_fir_res=a+k*(ecg_fir_res-Min);            //数据归一化
-							data_to_send[1]=ecg_fir_res;
-							data_to_send[2]=ecg_fir_res;
-//							data_to_send[1]=(u8)ecg_fir_res&0x000000FF;
-//							data_to_send[2]=(u8)(ecg_fir_res>>8)&0x000000FF;
-//							data_to_send[3]=(u8)(ecg_fir_res>>16)&0x000000FF;
-//							data_to_send[4]=(u8)(ecg_fir_res>>24)&0x000000FF;
-//							sum=0;
-							//for(i=1;i<5;++i) sum=(u8)(sum+data_to_send[i]);
-//							data_to_send[5]=sum;
-							data_to_send[3]=0x5A;
-							 
-							
-
-							
-							if(times>175) {
-								//OLED_ShowFunction(res);
-								HC05_Send_Data(data_to_send,4);
-								OLED_ShowTimesFunction(2,ecg_fir_res);
+							ecg_fir_res+=100000;
+							if(!times) {				
+								if(ecg_times&&ecg_fir_res>ecg_max) ecg_max=ecg_fir_res;
+								if(ecg_times&&ecg_fir_res<ecg_min) ecg_min=ecg_fir_res;
+								//OLED_ShowTimesFunction(2,ecg_fir_res);
+								if(!ecg_times) {
+									k=(b-a)/(ecg_max-ecg_min);
+									ecg_fir_res=a+k*(ecg_fir_res-ecg_min);             //数据归一化至[a:b]区间
+//									if(ecg_fir_res<20||ecg_fir_res>100) ecg_fir_res=0;
+									ecg_thresh=b*0.6;                 //获取阈值
+									data_to_send[1]=ecg_fir_res;
+									data_to_send[2]=ecg_thresh;
+									sum=0;
+									for(i=1;i<3;++i) sum+=data_to_send[i];
+									data_to_send[3]=sum;
+									data_to_send[4]=0x5A;
+									HC05_Send_Data(data_to_send,5);
+								
+								}
+								if(ecg_times) ecg_times--;
 							}
-							times++;
+							if(times) times--;
 						}
 						ecg_sum_count = 0;	//计数清零
 						ecg_sum_temp = 0;	//求和清零
 					}
 					ads1292_recive_flag = 0;
 				}
-				if(KEY2==0) return;
+				if(KEY2==0) {
+					ecg_thresh=0;
+					ecg_max=0x80000000;             //获取峰值
+					ecg_min=0x7FFFFFFF;             //获取峰值
+					return;
+				}
 			}
 		case DEFAULT:
 			break;

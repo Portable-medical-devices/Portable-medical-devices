@@ -50,6 +50,44 @@ typedef struct {
 	Mode mode;                     //模式数据
 }User;
 
+//start任务
+//任务优先级
+#define START_TASK_PRIO		3
+//任务堆栈大小	
+#define START_STK_SIZE 		512
+//任务控制块
+extern OS_TCB StartTaskTCB;
+//任务堆栈	
+extern CPU_STK START_TASK_STK[START_STK_SIZE];
+//任务函数
+void start_task(void *p_arg);
+
+//OLED任务
+//任务优先级
+#define OLED_TASK_PRIO		4
+//任务堆栈大小	
+#define OLED_STK_SIZE 		128
+//任务控制块
+extern OS_TCB OledTaskTCB;
+//任务堆栈	
+extern CPU_STK OLED_TASK_STK[OLED_STK_SIZE];
+void oled_task(void *p_arg);
+
+//任务优先级
+#define KEYPROCESS_TASK_PRIO 	3
+//任务堆栈大小	
+#define KEYPROCESS_STK_SIZE 	128
+//任务控制块
+extern OS_TCB Keyprocess_TaskTCB;
+//任务堆栈	
+extern CPU_STK KEYPROCESS_TASK_STK[KEYPROCESS_STK_SIZE];
+//任务函数
+void Keyprocess_task(void *p_arg);
+
+////////////////////////消息队列//////////////////////////////
+#define KEYMSG_Q_NUM	1	//按键消息队列的数量
+extern OS_Q KEY_Msg;				//定义一个消息队列，用于按键消息传递，模拟消息邮箱
+
 void Software_Init(void);          //软件初始化
 void Dirver_Init(void);            //硬件初始化
 void Show_Logo(void);              //显示Logo
