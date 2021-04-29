@@ -49,14 +49,14 @@ typedef struct {
 	Walk walk;                     //行走数据
 	float temputre;                //温度数据
 	Mode mode;                     //模式数据
-	u8 ecg_times;                  //心率数据
+	u16 ecg_times;                  //心率数据
 }User;
 
 //start任务
 //任务优先级
 #define START_TASK_PRIO		3
 //任务堆栈大小	
-#define START_STK_SIZE 		512
+#define START_STK_SIZE 		128
 //任务控制块
 extern OS_TCB StartTaskTCB;
 //任务堆栈	
@@ -68,7 +68,7 @@ void start_task(void *p_arg);
 //任务优先级
 #define OLED_TASK_PRIO		4
 //任务堆栈大小	
-#define OLED_STK_SIZE 		1024
+#define OLED_STK_SIZE 		512
 //任务控制块
 extern OS_TCB OledTaskTCB;
 //任务堆栈	
@@ -113,6 +113,7 @@ void Show_ADS1292_Init(void);      //显示初始化ADS1292
 void Show_Menu(void);              //显示菜单
 void Show_Temputre(void);          //显示温度
 void Show_Step(void);              //显示移动信息
+void Show_Ecg(void);               //显示心电数据
 u8   Get_Ecg(void);                //获取心电波形
 u8   Scan_Key(void);               //扫描按键
 void Change_Mode(u8 y);            //模式切换

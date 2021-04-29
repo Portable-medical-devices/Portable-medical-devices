@@ -13,5 +13,8 @@
 
 extern u8 LOGO[];
 extern u8 ARROW[];
+extern u8 WALK[];
+extern u8 TEMPUTRE[];
+extern u8 HEART[];
 
 #endif

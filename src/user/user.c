@@ -73,7 +73,9 @@ void Show_Logo(void) {           //显示Logo
 	OS_ERR err;
 	OLED_Clear();                                               //OLED清屏
 	OLED_ShowPicture(0,0,128,8,LOGO);                           //显示LOGO
+	OLED_Refresh();
 	OSTimeDlyHMSM(0,0,0,500,OS_OPT_TIME_HMSM_STRICT,&err);        //延时1s
+	OLED_Clear();                                               //OLED清屏
 }
 
 void Show_LMT70_Init(void) {                       //显示初始化LMT70
@@ -174,7 +176,7 @@ u8   Scan_Key(void) {               //扫描按键
 void Show_Menu(void) {              //显示菜单
 	OLED_ShowString(32,0," Temputre",16);
 	OLED_ShowString(32,20," Step",16);
-	OLED_ShowString(32,40," Huart",16);
+	OLED_ShowString(32,40," Heart",16);
 	OLED_Refresh();
 }
 
@@ -200,35 +202,40 @@ void Applicaton(void) {             //应用
 			}
 			break;
 		case STEP_MODE:
-			while(1) {
+			while(1) {				
 				if(KEY2==0) return;
 				Show_Step();
 			}
 			break;
 		case HART_MODE:
-			OLED_ShowString(0,0,"bmp:loading...",24);
+			OLED_ShowPicture(0,4,36,8,HEART);
+			OLED_ShowString(0,0,"bpm:...",24);
 			OLED_Refresh();
 			while(1) {
-				if((len=Get_Ecg())) { //获取到心电数据
-					TIM_Cmd(TIM3, ENABLE); 
-//					OSTaskResume((OS_TCB*)&EcgTaskTCB,&err);
-					if(ecg_fir_res<=ecg_fir_res_pre) flag=1;
-					if(flag&&ecg_fir_res>48&&ecg_fir_res>ecg_fir_res_pre) {
-						user.ecg_times++;
-						flag=0;
-					}
-					HC05_Send_Data(data_to_send,len);
-					//OSTimeDlyHMSM(0,0,0,3,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms 
-				}
 				if(KEY2==0) {
-					TIM_Cmd(TIM3, DISABLE); 
-					//OS_TaskSuspend((OS_TCB*)&EcgTaskTCB,&err);		//挂起开始任务	
+					TIM_Cmd(TIM3, DISABLE);    //停止计时
 					return;
 				}
-				
+				Show_Ecg();
 			}
 		case DEFAULT:
 			break;
+	}
+}
+
+void Show_Ecg(void) {               //显示心电数据
+	u8 len;
+	static u8 flag=1;
+	if((len=Get_Ecg())) { //获取到心电数据
+//		OSTaskResume((OS_TCB*)&EcgTaskTCB,&err);
+		if(ecg_fir_res<=ecg_fir_res_pre) flag=1;
+		if(flag&&ecg_fir_res>48&&ecg_fir_res>ecg_fir_res_pre) {
+			TIM_Cmd(TIM3, ENABLE); 
+			user.ecg_times++;
+			flag=0;
+		}
+		HC05_Send_Data(data_to_send,len);
+		//OSTimeDlyHMSM(0,0,0,3,OS_OPT_TIME_HMSM_STRICT,&err);    //延时5ms 
 	}
 }
 
@@ -310,6 +317,7 @@ void Software_Init(void) {          //软件初始化
 
 void Show_Temputre(void) {          //显示温度
 	char buf[30]={0};
+	OLED_ShowPicture(5,2,17,5,TEMPUTRE);
 	user.temputre=(float)Get_Adc_Middle(ADC_Channel_1,500)*(3.3/4096);  //ADC中位数滤波值获取
 	user.temputre=212.009-193*user.temputre;
 	sprintf(buf,"%.2f C   ",(float)user.temputre);                         
@@ -320,11 +328,12 @@ void Show_Temputre(void) {          //显示温度
 
 void Show_Step(void) {              //显示移动信息
 	char buf[2][100]={0};
+	OLED_ShowPicture(0,1,29,7,WALK);
 	MPU_Step_Count();
 	sprintf(buf[0],"%d step",(int)user.walk.step);
-	OLED_ShowString(30,16,buf[0],16);
+	OLED_ShowString(40,6,buf[0],24);
 	sprintf(buf[1],"%.0f m",user.walk.distance);
-	OLED_ShowString(30,32,buf[1],16);
+	OLED_ShowString(40,30,buf[1],24);
 	OLED_Refresh();
 }
 

@@ -50,19 +50,22 @@ void TIM3_Int_Init(u16 arr,u16 psc)
 void TIM3_IRQHandler(void)   //TIM3中断
 {
 	char buf[100];
-	static u8 times=0;
 	if (TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
 	{
 
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
-		times++;
-		if(times==60) {
+		timer_times++;
+		if(timer_times==60) {
 			sprintf(buf,"bmp:%d               ",user.ecg_times);
 			user.ecg_times=0;
 			OLED_ShowString(0,0,buf,24);
+			OLED_ShowPicture(0,4,36,8,HEART);
 			OLED_Refresh();
-			times=0;
+			timer_times=0;
 		}
+		sprintf(buf,"%02d",60-timer_times);
+		OLED_ShowString(92,40,buf,24);
+		OLED_Refresh();
 	}
 
 }
