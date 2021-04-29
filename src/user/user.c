@@ -229,7 +229,7 @@ void Show_Ecg(void) {               //显示心电数据
 	if((len=Get_Ecg())) { //获取到心电数据
 //		OSTaskResume((OS_TCB*)&EcgTaskTCB,&err);
 		if(ecg_fir_res<=ecg_fir_res_pre) flag=1;
-		if(flag&&ecg_fir_res>48&&ecg_fir_res>ecg_fir_res_pre) {
+		if(flag&&ecg_fir_res>ecg_thresh&&ecg_fir_res>ecg_fir_res_pre) {
 			TIM_Cmd(TIM3, ENABLE); 
 			user.ecg_times++;
 			flag=0;
@@ -244,7 +244,7 @@ u8   Get_Ecg(void) {                //获取心电波形
 	u8 sum=0;
 	u8 ret=0;
 	static u8 t=0;
-	static u32 ecg_times=500;
+	static u32 ecg_times=750;
 	static u32 times=200;
 	static double volatile b=80;
 	static double volatile a=20;
@@ -275,7 +275,7 @@ u8   Get_Ecg(void) {                //获取心电波形
 						ecg_fir_res=a+k*(ecg_fir_res-ecg_min);             //数据归一化至[a:b]区间
 						t=ecg_fir_res;
 	//					if(ecg_fir_res<20||ecg_fir_res>100) ecg_fir_res=0;
-						ecg_thresh=b*0.6;                 //获取阈值
+						ecg_thresh=65;                 //获取阈值
 						data_to_send[1]=ecg_fir_res;
 						data_to_send[2]=ecg_thresh;
 						sum=0;
@@ -330,7 +330,7 @@ void Show_Step(void) {              //显示移动信息
 	char buf[2][100]={0};
 	OLED_ShowPicture(0,1,29,7,WALK);
 	MPU_Step_Count();
-	sprintf(buf[0],"%d step",(int)user.walk.step);
+	sprintf(buf[0],"%d s",(int)user.walk.step);
 	OLED_ShowString(40,6,buf[0],24);
 	sprintf(buf[1],"%.0f m",user.walk.distance);
 	OLED_ShowString(40,30,buf[1],24);

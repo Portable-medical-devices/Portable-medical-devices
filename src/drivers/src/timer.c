@@ -56,7 +56,7 @@ void TIM3_IRQHandler(void)   //TIM3中断
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
 		timer_times++;
 		if(timer_times==60) {
-			sprintf(buf,"bmp:%d               ",user.ecg_times);
+			sprintf(buf,"bmp:%d    ",user.ecg_times);
 			user.ecg_times=0;
 			OLED_ShowString(0,0,buf,24);
 			OLED_ShowPicture(0,4,36,8,HEART);
