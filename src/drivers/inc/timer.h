@@ -1,15 +1,20 @@
-#include "sys.h"  
+#ifndef __TIMER_H
+#define __TIMER_H
+#include "sys.h"
+//////////////////////////////////////////////////////////////////////////////////	 
+//本程序只供学习使用，未经作者许可，不得用于其它任何用途
+//ALIENTEK Mini STM32开发板
+//通用定时器 驱动代码			   
+//正点原子@ALIENTEK
+//技术论坛:www.openedv.com
+//修改日期:2010/12/03
+//版本：V1.0
+//版权所有，盗版必究。
+//Copyright(C) 正点原子 2009-2019
+//All rights reserved
+////////////////////////////////////////////////////////////////////////////////// 	  
 
 
-
-extern u8	TIM3_keynum;//按键延时标志
-extern u8 TIM2_IRQ_flag;
-extern u8 TIM4_Timing;
-
-void TIM2_Init(u16 arr,u16 psc);
-void TIM3_Init(u16 arr,u16 psc);
-void TIM4_Init(u16 arr,u16 psc);
-void TIM5_Init(u16 arr,u16 psc);
-void TIM6_Init(u16 arr,u16 psc);
-void TIM7_Init(u16 arr,u16 psc);
-
+void TIM3_Int_Init(u16 arr,u16 psc); 
+ 
+#endif

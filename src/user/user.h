@@ -31,6 +31,7 @@
 #include "fdacoefs.h"
 #include "stm32f10x_exti.h"
 #include "dma.h"
+#include "timer.h"
 
 typedef enum {
 	TEMPUTRE_MODE,
@@ -48,6 +49,7 @@ typedef struct {
 	Walk walk;                     //行走数据
 	float temputre;                //温度数据
 	Mode mode;                     //模式数据
+	u8 ecg_times;                  //心率数据
 }User;
 
 //start任务
@@ -66,7 +68,7 @@ void start_task(void *p_arg);
 //任务优先级
 #define OLED_TASK_PRIO		4
 //任务堆栈大小	
-#define OLED_STK_SIZE 		128
+#define OLED_STK_SIZE 		1024
 //任务控制块
 extern OS_TCB OledTaskTCB;
 //任务堆栈	
@@ -84,9 +86,22 @@ extern CPU_STK KEYPROCESS_TASK_STK[KEYPROCESS_STK_SIZE];
 //任务函数
 void Keyprocess_task(void *p_arg);
 
+////心率显示任务
+////任务优先级
+//#define ECG_TASK_PRIO		5
+////任务堆栈大小	
+//#define ECG_STK_SIZE 		128
+////任务控制块
+//extern OS_TCB EcgTaskTCB;
+////任务堆栈	
+//extern CPU_STK ECG_TASK_STK[ECG_STK_SIZE];
+//void ecg_task(void *p_arg);
+
 ////////////////////////消息队列//////////////////////////////
 #define KEYMSG_Q_NUM	1	//按键消息队列的数量
 extern OS_Q KEY_Msg;				//定义一个消息队列，用于按键消息传递，模拟消息邮箱
+
+extern u8 timer_times;
 
 void Software_Init(void);          //软件初始化
 void Dirver_Init(void);            //硬件初始化
@@ -98,6 +113,7 @@ void Show_ADS1292_Init(void);      //显示初始化ADS1292
 void Show_Menu(void);              //显示菜单
 void Show_Temputre(void);          //显示温度
 void Show_Step(void);              //显示移动信息
+u8   Get_Ecg(void);                //获取心电波形
 u8   Scan_Key(void);               //扫描按键
 void Change_Mode(u8 y);            //模式切换
 void Applicaton(void);             //应用

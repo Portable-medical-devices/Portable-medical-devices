@@ -233,6 +233,7 @@ OS_TCB Keyprocess_TaskTCB;
 //任务堆栈	
 CPU_STK KEYPROCESS_TASK_STK[KEYPROCESS_STK_SIZE];
 
+
 ////////////////////////消息队列//////////////////////////////
 OS_Q KEY_Msg;				//定义一个消息队列，用于按键消息传递，模拟消息邮箱
 
@@ -319,7 +320,7 @@ void start_task(void *p_arg)
                  (OS_TICK	  )0,  					
                  (void   	* )0,					
                  (OS_OPT      )OS_OPT_TASK_STK_CHK|OS_OPT_TASK_STK_CLR,
-                 (OS_ERR 	* )&err);	 				 
+                 (OS_ERR 	* )&err);	 	
 	OS_TaskSuspend((OS_TCB*)&StartTaskTCB,&err);		//挂起开始任务			 
 	OS_CRITICAL_EXIT();	//退出临界区
 }
@@ -398,5 +399,4 @@ void Keyprocess_task(void *p_arg) {
 		OSTimeDlyHMSM(0,0,0,5,OS_OPT_TIME_PERIODIC,&err);   //延时5ms
 	}
 }
-
 

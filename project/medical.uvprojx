@@ -478,6 +478,11 @@
               <FileType>1</FileType>
               <FilePath>..\src\drivers\src\dma.c</FilePath>
             </File>
+            <File>
+              <FileName>timer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\drivers\src\timer.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
