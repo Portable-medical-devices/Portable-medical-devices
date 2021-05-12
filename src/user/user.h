@@ -118,6 +118,8 @@ u8   Get_Ecg(void);                //获取心电波形
 u8   Scan_Key(void);               //扫描按键
 void Change_Mode(u8 y);            //模式切换
 void Applicaton(void);             //应用
+void Send_Step_Data(void);         //发送步数数据
+void Send_Temputre_Data(void);     //发送温度数据
 
 extern User user;                  //用户数据
 

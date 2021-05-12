@@ -45,6 +45,8 @@ u8 data_send_ok=0;
 
 int ecg_max=0x80000000;             //获取峰值
 int ecg_min=0x7FFFFFFF;             //获取峰值
+int ecg_max_sum=0;             //获取峰值
+int ecg_min_sum=0;             //获取峰值
 int ecg_max_next=0x80000000;             //获取峰值
 int ecg_min_next=0x7FFFFFFF;             //获取峰值
 u8 ecg_thresh=0;          //阈值
@@ -199,12 +201,14 @@ void Applicaton(void) {             //应用
 			while(1) {
 				if(KEY2==0) return;
 				Show_Temputre();
+				//Send_Temputre_Data();
 			}
 			break;
 		case STEP_MODE:
 			while(1) {				
 				if(KEY2==0) return;
 				Show_Step();
+				Send_Step_Data();
 			}
 			break;
 		case HART_MODE:
@@ -221,6 +225,27 @@ void Applicaton(void) {             //应用
 		case DEFAULT:
 			break;
 	}
+}
+
+void Send_Step_Data() {
+	
+}
+
+void Send_Temputre_Data() {
+	u8 i,j=0;
+	union {
+		float temputre;
+		u8 buf[4];
+	}temp;
+	temp.temputre=user.temputre;
+	data_to_send[0]=0xA5;	//25-32位
+	data_to_send[5]=0;
+	for(i=1,j=0;i<=4;++i,++j) {
+		data_to_send[i]=temp.buf[j];
+		data_to_send[5]+=temp.buf[j];
+	}
+	data_to_send[6]=0x5A;
+	HC05_Send_Data(data_to_send,7);
 }
 
 void Show_Ecg(void) {               //显示心电数据
@@ -244,7 +269,8 @@ u8   Get_Ecg(void) {                //获取心电波形
 	u8 sum=0;
 	u8 ret=0;
 	static u8 t=0;
-	static u32 ecg_times=750;
+	static u32 ecg_times=300;
+	static u32 ecg_average_times=3;
 	static u32 times=200;
 	static double volatile b=80;
 	static double volatile a=20;
@@ -270,19 +296,31 @@ u8   Get_Ecg(void) {                //获取心电波形
 					if(ecg_times&&ecg_fir_res<ecg_min) ecg_min=ecg_fir_res;
 					//OLED_ShowTimesFunction(2,ecg_fir_res);
 					if(!ecg_times) {
-						k=(b-a)/(ecg_max-ecg_min);
-						ecg_fir_res_pre=t;                       //保存上一次数值
-						ecg_fir_res=a+k*(ecg_fir_res-ecg_min);             //数据归一化至[a:b]区间
-						t=ecg_fir_res;
-	//					if(ecg_fir_res<20||ecg_fir_res>100) ecg_fir_res=0;
-						ecg_thresh=65;                 //获取阈值
-						data_to_send[1]=ecg_fir_res;
-						data_to_send[2]=ecg_thresh;
-						sum=0;
-						for(i=1;i<3;++i) sum+=data_to_send[i];
-						data_to_send[3]=sum;
-						data_to_send[4]=0x5A;				
-						ret=5;
+						if(ecg_average_times){
+							ecg_max_sum+=ecg_max;
+							ecg_min_sum+=ecg_min;
+						}
+						if(!ecg_average_times) {
+							ecg_max=ecg_max_sum/3;
+							ecg_min=ecg_min_sum/3;
+							k=(b-a)/(ecg_max-ecg_min);
+							ecg_fir_res_pre=t;                       //保存上一次数值
+							ecg_fir_res=a+k*(ecg_fir_res-ecg_min);             //数据归一化至[a:b]区间
+							t=ecg_fir_res;
+							if(ecg_fir_res<a-10||ecg_fir_res>b+10) ecg_fir_res=0;
+							ecg_thresh=60;                 //获取阈值
+							data_to_send[1]=ecg_fir_res;
+							data_to_send[2]=ecg_thresh;
+							sum=0;
+							for(i=1;i<3;++i) sum+=data_to_send[i];
+							data_to_send[3]=sum;
+							data_to_send[4]=0x5A;				
+							ret=5;
+						}
+						if(ecg_average_times) {
+							ecg_average_times--;
+							ecg_times=300;
+						}
 					}
 					if(ecg_times) ecg_times--;
 				}
@@ -324,6 +362,7 @@ void Show_Temputre(void) {          //显示温度
 	printf("%.2f\r\n",user.temputre);
 	OLED_ShowString(25,18,buf,24);
 	OLED_Refresh();
+	//发送数据
 }
 
 void Show_Step(void) {              //显示移动信息

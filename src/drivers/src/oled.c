@@ -227,40 +227,10 @@ void OLED_ShowPicture(u8 x0,u8 y0,u8 x1,u8 y1,u8 BMP[]) {   //显示图片
 		OLED_WR_Byte(0xb0+y,OLED_CMD);//设置行起始地址
 		OLED_WR_Byte(((x0&0xf0)>>4)|0x10,OLED_CMD);
 		OLED_WR_Byte((x0&0x0f),OLED_CMD);
-		for(x=x0;x<x1;++x) OLED_GRAM[x][y]=BMP[j++];
-		//OLED_WR_Byte(BMP[j++],OLED_DATA);
+		for(x=x0;x<x1;++x) OLED_GRAM[x][y]=BMP[j++];	
 	}
 	
 }
-
-//void OLED_Full(void) {                   //全亮
-//	u8 i,j;
-//	for(i=0;i<8;++i) {
-//		OLED_WR_Byte(0xB0+i,OLED_CMD);   //设置行起始地址
-//		OLED_WR_Byte(0x00,OLED_CMD);     //设置低列起始地址
-//		OLED_WR_Byte(0x10,OLED_CMD);     //设置高列起始地址
-//		for(j=0;j<128;++j) {
-//			OLED_GRAM[j][i]=0;           //全亮所有数据
-//		}
-//	}
-//	OLED_Refresh();
-//}
-//void OLED_Refresh(void) {                  //根据显存更新
-//	u8 i,n;
-//	for(i=0;i<8;i++) {
-//	   OLED_WR_Byte(0xB0+i,OLED_CMD); //设置行起始地址
-//	   OLED_WR_Byte(0x00,OLED_CMD);   //设置低列起始地址
-//	   OLED_WR_Byte(0x10,OLED_CMD);   //设置高列起始地址
-//	   for(n=0;n<128;n++) OLED_WR_Byte(OLED_GRAM[n][i],OLED_DATA);
-//    }
-//}
-
-//void OLED_DrawPoint(u8 x,u8 y) {      //画点
-//	u8 page,col;
-//	page=y/8;                         //计算页数
-//	col=1<<(y%8);                     //计算数值
-//	OLED_GRAM[x][page]|=col;          //更新数值
-//}
 
 #define UCOS
 
@@ -284,18 +254,20 @@ void OLED_ShowFunction(float data) {                       //显示波形
 }
 
 void OLED_ShowTimesFunction(u8 times,float data) {                       //显示波形
-	static u8 buf[130]={0};
-	u8 i,j;
-	OLED_Clear();
-	for(i=0;i<128-times;i+=times) {
-		buf[i]=buf[i+times];
+	int index,i,j;
+	static u8 front=0,back=127;
+	static u8 GRAM[128]={0};
+	OLED_Clear(); 
+	GRAM[back]=data;
+	i=front,j=back;
+	index=0;
+	while(i!=j) {
+		OLED_DrawPoint(index,63-GRAM[i]);
+		i=(i+1)%128;
+		index++;
 	}
-	buf[i]=data;
-	for(j=0;j<128;j+=times) {
-		OLED_DrawPoint(j,63-buf[j]);
-	}
-	for(i=0;i<128-times;i+=times) {
-		OLED_DrawLine(i,63-buf[i],i+times,63-buf[i+times]);
-	}
-	OLED_Refresh();
+	GRAM[front]=0;
+	back=(back+1)%128;
+	front=(front+1)%128;
+	OLED_Refresh(); 
 }
